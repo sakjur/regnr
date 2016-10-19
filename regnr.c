@@ -6,7 +6,7 @@
  *
  * Very simple, straight forward, single function, standard library C99
  * code submission reading the filename for the input file from argv[1]
- * 
+ *
  * Refers to a complete registration plate mapping on the heap to detect
  * collissions
  *
@@ -26,7 +26,7 @@
 // CHANGE TO 7 IF USING UNIX LINE ENDINGS
 #define SIZE_OF_ROW 8
 #define ROW_BUFFER 6000
-#define NUMBER_OF_PLATES 17576000 
+#define NUMBER_OF_PLATES 17576000
 
 // Unused
 //int ctoi(char c) {
@@ -41,7 +41,7 @@
 
 int main(int argc, char* argv[]) {
     FILE* input;
-    input = fopen(argv[1], "r");
+    input = fopen(argv[1], "rb");
     char* d = (char*) calloc(1, NUMBER_OF_PLATES);
     char regnr[SIZE_OF_ROW * ROW_BUFFER];
     int regnr_read = fread(regnr, SIZE_OF_ROW, ROW_BUFFER, input);
@@ -52,7 +52,7 @@ int main(int argc, char* argv[]) {
      */
     while (regnr_read != 0) { // End loop on EOF
         for (int i = 0; i < regnr_read; i++) {
-            value = REGVAL((regnr + i*8)); 
+            value = REGVAL((regnr + i*SIZE_OF_ROW));
             if (d[value] == 1) {
                 printf("Dubbletter\n");
                 goto exit; // Yes, I did!
