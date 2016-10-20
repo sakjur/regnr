@@ -24,33 +24,16 @@
         + 1000*ACTOI(str[2]) + 100*ICTOI(str[3]) + 10*ICTOI(str[4]) +\
         ICTOI(str[5]));
 
-#define LOOKUP(str,n) (lookup[(int) str[n]])
-#define REGVAL2(str) (676*LOOKUP(str, 0) + 100 * LOOKUP(str, 3) \
-        + 26*LOOKUP(str, 1) + 10 * LOOKUP(str, 4) \
-        + LOOKUP(str, 2) + LOOKUP(str, 5))
-
 // CHANGE TO 7 IF USING UNIX LINE ENDINGS
 #define SIZE_OF_ROW 8
 #define ROW_BUFFER 6000
 #define NUMBER_OF_PLATES 17576000
-
-int lookup[] = {
-    0, 0, 0, 0,    0, 0, 0, 0,    0, 0, 0, 0,    0, 0, 0, 0,
-    0, 0, 0, 0,    0, 0, 0, 0,    0, 0, 0, 0,    0, 0, 0, 0,
-    0, 0, 0, 0,    0, 0, 0, 0,    0, 0, 0, 0,    0, 0, 0, 0,
-    0, 1, 2, 3,    4, 5, 6, 7,    8, 9, 0, 0,    0, 0, 0, 0,
-    0, 0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000,
-        9000, 10000, 11000, 12000, 13000, 14000,
-    15000, 16000, 17000, 18000, 19000, 20000, 21000,
-        22000, 23000, 24000, 25000, 26000,    0, 0, 0, 0,
-    0, 0, 0, 0,    0, 0, 0, 0,    0, 0, 0, 0,    0, 0, 0, 0,
-    0, 0, 0, 0,    0, 0, 0, 0,    0, 0, 0, 0,    0, 0, 0, 0
-};
+#define NUMBER_OF_PLATE_BYTES 2197000
 
 int main(int argc, char* argv[]) {
     FILE* input;
     input = fopen(argv[1], "rb");
-    char* d = (char*) calloc(1, NUMBER_OF_PLATES);
+    char* d = (char*) calloc(1, NUMBER_OF_PLATE_BYTES);
     char regnr[SIZE_OF_ROW * ROW_BUFFER];
     int regnr_read = fread(regnr, SIZE_OF_ROW, ROW_BUFFER, input);
     int value = 0;
@@ -60,12 +43,14 @@ int main(int argc, char* argv[]) {
      */
     while (regnr_read != 0) { // End loop on EOF
         for (int i = 0; i < regnr_read; i++) {
-            value = REGVAL2((regnr + i*SIZE_OF_ROW));
-            d[value] = d[value] ^ 1;
-            if (!d[value]) {
+            value = REGVAL((regnr + i*SIZE_OF_ROW));
+            char mask = 1 << (value % 8);
+            value = value / 8;
+            if ((d[value] & mask) != 0) {
                 printf("Dubbletter\n");
                 goto exit; // Yes, I did!
             }
+            d[value] = d[value] | mask;
         }
         // Buffer up next ROW_BUFFER rows of plates
         regnr_read = fread(regnr, SIZE_OF_ROW, ROW_BUFFER, input);
