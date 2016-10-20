@@ -14,7 +14,6 @@
  * CC0 if one is needed :)
  */
 
-#define _DEFAULT_SOURCE 1
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -26,13 +25,16 @@
 
 // CHANGE TO 7 IF USING UNIX LINE ENDINGS
 #define SIZE_OF_ROW 8
-#define ROW_BUFFER 6000
-#define NUMBER_OF_PLATES 17576000
+#define ROW_BUFFER 16384
 #define NUMBER_OF_PLATE_BYTES 2197000
+#define BUFFER_SIZE SIZE_OF_ROW*ROW_BUFFER
 
 int main(int argc, char* argv[]) {
     FILE* input;
     input = fopen(argv[1], "rb");
+    char* file_buf = (char*)malloc(BUFFER_SIZE);
+    setvbuf(input, file_buf, _IOFBF, BUFFER_SIZE);
+
     char* d = (char*) calloc(1, NUMBER_OF_PLATE_BYTES);
     char regnr[SIZE_OF_ROW * ROW_BUFFER];
     int regnr_read = fread(regnr, SIZE_OF_ROW, ROW_BUFFER, input);
